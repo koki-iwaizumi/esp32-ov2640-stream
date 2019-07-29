@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="ja">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.4/css/all.css">
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+		<title>OV2640</title>
+		<style>
+			.alert{
+				display:none;
+			}
+			#overlay{   
+				position: fixed;
+				top: 0;
+				z-index: 100;
+				width: 100%;
+				height:100%;
+				display: none;
+				background: rgba(0,0,0,0.6);
+			}
+			.cv-spinner{
+				height: 100%;
+				display: flex;
+				justify-content: center;
+				align-items: center;  
+			}
+			.spinner{
+				width: 40px;
+				height: 40px;
+				border: 4px #ddd solid;
+				border-top: 4px #2e93e6 solid;
+				border-radius: 50%;
+				animation: sp-anime 0.8s infinite linear;
+			}
+			@keyframes sp-anime{
+				0% { 
+					transform: rotate(0deg); 
+				}
+				100% { 
+					transform: rotate(359deg); 
+				}
+			}
+			.is-hide{
+				display:none;
+			}
+			.ov_a{
+				height:600px;
+				overflow-y:auto;
+			}
+		</style>
+	</head>
+	<body>
+ 
+		<div id="overlay">
+			<div class="cv-spinner">
+				<span class="spinner"></span>
+			</div>
+		</div>
+
+		<div class="text-center mt-3 mb-3">
+			<h1>OV2640</h1>
+		</div>
+
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-lg-6 text-center mb-4">
+					<div class="row">
+						<div class="col-md-12">
+							<div class="alert alert-success" role="alert"></div>
+							<div class="alert alert-danger" role="alert"></div>
+						</div>
+						<div class="col-md-12">
+							<img id="img" class="mw-100">
+						</div>
+					</div>
+				</div>
+
+				<div class="col-lg-6">
+					<div class="ov_a">
+						<div class="text-center mt-1 mb-1">
+							<span>0xFF=00</span>
+						</div>
+						<table id="table_regs0" class="table table-striped">
+							<tr>
+								<th>Address(Hex)</th>
+								<th>Name</th>
+								<th>Value(Hex)</th>
+								<th></th>
+							</tr>
+						</table>
+						<div class="text-center mt-1 mb-1">
+							<span>0xFF=01</span>
+						</div>
+						<table id="table_regs1" class="table table-striped">
+							<tr>
+								<th>Address(Hex)</th>
+								<th>Name</th>
+								<th>Value(Hex)</th>
+								<th></th>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+ 
+		<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+		<script type="text/javascript">
+			$(function(){
+
+				var regs0 = {
+					0x05: "R_BYPASS",
+					0x44: "Qs",
+					0x50: "CTRLI",
+					0x51: "HSIZE",
+					0x52: "VSIZE",
+					0x53: "XOFFL",
+					0x54: "YOFFL",
+					0x55: "VHYX",
+					0x56: "DPRP",
+					0x57: "TEST",
+					0x5A: "ZMOW",
+					0x5B: "ZMOH",
+					0x5C: "ZMHH",
+					0x7C: "BRADDR",
+					0x7D: "BPDATA",
+					0x86: "CTRL2",
+					0x87: "CTRL3",
+					0x8C: "SIZEL",
+					0xC0: "HSIZE8",
+					0xC1: "VSIZE8",
+					0xC2: "CTRL0",
+					0xC3: "CTRL1",
+					0xD3: "R_DVP_SP",
+					0xDA: "IMAGE_MODE",
+					0xE0: "RESET",
+					0xED: "REGED",
+					0xF0: "MS_SP",
+					0xF7: "SS_ID",
+					0xF8: "SS_CTRL",
+					0xF9: "MC_BIST",
+					0xFA: "MC_AL",
+					0xFB: "MC_AH",
+					0xFC: "MC_D",
+					0xFD: "P_CMD",
+					0xFE: "P_STATUS",
+					0xFF: "RA_DLMT",
+				};
+
+				var regs1 = {
+					0x0: "GAIN",
+					0x3: "COM1",
+					0x4: "REG04",
+					0x8: "REG08",
+					0x9: "COM2",
+					0xA: "PIDH",
+					0xB: "PIDL",
+					0xC: "COM3",
+					0xC: "COM3",
+					0x10: "AEC",
+					0x11: "CLKRC",
+					0x12: "COM7",
+					0x13: "COM8",
+					0x14: "COM9",
+					0x15: "COM10",
+					0x17: "HREFST",
+					0x18: "HREFEND",
+					0x19: "VSTART",
+					0x1A: "VEND",
+					0x1C: "MIDH",
+					0x1D: "MIDL",
+					0x24: "AEW",
+					0x25: "AEB",
+					0x26: "VV",
+					0x2A: "REG2A",
+					0x2B: "FRARL",
+					0x2D: "ADDVSL",
+					0x2E: "ADDVSH",
+					0x2E: "ADDVSH",
+					0x2F: "YAVG",
+					0x32: "REG32",
+					0x34: "ARCOM2",
+					0x45: "REG45",
+					0x46: "FLL",
+					0x47: "FLH",
+					0x48: "COM19",
+					0x49: "ZOOMS",
+					0x4B: "COM22",
+					0x4E: "COM25",
+					0x4F: "BD50",
+					0x50: "BD60",
+					0x5D: "REG5D",
+					0x5E: "REG5E",
+					0x5F: "REG5F",
+					0x60: "REG60",
+					0x61: "HISTO_LOW",
+					0x62: "HISTO_HIGH",
+				};
+
+				function get_image(){
+					var xhr = new XMLHttpRequest();
+					xhr.onreadystatechange = function(){
+						if(this.readyState == 4 && this.status == 200){
+							var img = document.getElementById("img");
+							img.src = window.URL.createObjectURL(this.response);
+							get_image();
+						}
+					}
+					xhr.open('GET', "./image");
+					xhr.responseType = 'blob';
+					xhr.send();
+				};
+
+				function write_config(bank, k, v){
+					$.ajax({
+						url: "./write",
+						type: "GET",
+						dataType: "json",
+						data: {
+							bank: bank,
+							key: k,
+							value: v
+						},
+						beforeSend: function() {
+							$(".alert").css("display", "none");
+						}
+					})
+					.done((data) => {
+						$.each(data, function(i, item){
+							if(item == "success"){
+								$(".alert-success").css("display", "block");
+								$(".alert-success").text('bank:' + bank + ' key:0x' + Number(k).toString(16) + ' value:0x' + Number(v).toString(16) + ' success');
+							}else{
+								$(".alert-danger").css("display", "block");
+								$(".alert-danger").text('bank:' + bank + ' key:0x' + Number(k).toString(16) + ' value:0x' + Number(v).toString(16) + ' failed');
+							}
+						});
+					})
+                    .fail((data) => {
+						$(".alert-danger").css("display", "block");
+						$(".alert-danger").text('bank:' + bank + ' key:0x' + Number(k).toString(16) + ' value:0x' + Number(v).toString(16) + ' failed');
+                    });
+				};
+
+				$(document).ready(function(){
+					$.ajax({
+						url: "./config0",
+						type: "GET",
+						dataType: "json",
+						async: false,
+					})
+					.done((data) => {
+						$.each(data, function(i, item){
+							$("#table_regs0").append('<tr><td>0x' + Number(i).toString(16) + '</td><td>' + regs0[i] + '</td><td id="value_0_' + i + '">0x' + Number(item).toString(16) + '(0b' + Number(item).toString(2) + ')</td><td><input type="range" class="w-100 slider0" name="' + i + '" value="' + item + '" min="0" max="255" step="1"></td></tr>');
+						});
+					});
+
+					$.ajax({
+						url: "./config1",
+						type: "GET",
+						dataType: "json",
+						async: false,
+					})
+					.done((data) => {
+						$.each(data, function(i, item){
+							$("#table_regs1").append('<tr><td>0x' + Number(i).toString(16) + '</td><td>' + regs1[i] + '</td><td id="value_1_' + i + '">0x' + Number(item).toString(16) + '(0b' + Number(item).toString(2) + ')</td><td><input type="range" class="w-100 slider1" name="' + i + '" value="' + item + '" min="0" max="255" step="1"></td></tr>');
+						});
+					});
+
+					get_image();
+
+					$(".slider0").on("input change", function(){
+						$("#value_0_" + $(this).attr("name")).text("0x" + Number($(this).val()).toString(16) + "(0b" + Number($(this).val()).toString(2) + ")");
+					});
+
+					$(".slider1").on("input change", function(){
+						$("#value_1_" + $(this).attr("name")).text("0x" + Number($(this).val()).toString(16) + "(0b" + Number($(this).val()).toString(2) + ")");
+					});
+
+					$(".slider0").on("change", function(){
+						write_config(0, $(this).attr("name"), $(this).val())
+					});
+
+					$(".slider1").on("change", function(){
+						write_config(1, $(this).attr("name"), $(this).val())
+					});
+				});
+			});
+		</script>
+	</body>
+</html>
